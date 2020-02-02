@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<head>
+    <script src="jquery-3.4.1.min.js"></script>
+    <title>Salvo</title>
+    <style>
+        body {          background-color: rgb(245, 245, 220);}
+        th, td {        border: 1px solid rgb(0, 0, 0); 
+                        text-align: center; }
+        table {         table-layout: fixed;}
+        .water {        background-color: rgb(0, 255, 255);}
+    </style>
+    <script>
+        var shotsPerTurn = 5;
+        var shotList = [];
+        var shotHistory = [];   //TODO: turn histories into one two dimentional array
+        var hitHistory = [];
+
+        //refreshes the 'shots remaining', 'shot list' and 'previous shot' displays
+        function updateUI(){
+            //create html for 'previous shot' table
+            var shotTableHTML = "<tr><th style='width: 11em'>Previous</th>" +
+                "<th style='width: 11em'>Result</th></tr>";
+            for(var i=0; i<shotHistory.length; i++){
+                shotTableHTML += "<tr class='previousShot' id='" + i + "'><td>" + shotHistory[i] + 
+                    "</td><td>" + hitHistory[i] + "</td></tr>";
+            }
+
+            //update ui information
+            $("#history").html(shotTableHTML);
+            $("#shotList").text(shotList);
+            $("#shotsRemaining").text(shotsPerTurn - shotList.length);
+
+            //attach event listener to new elements
+            $(".previousShot").hover(function(){
+                //highlight shot entry in pink
+                $(this).css("background-color", "rgb(255, 192, 203)");
+
+                //highlight shot locations in pink
+                var index = $(this).attr("id");
+                shotHistory[index].forEach(function(value){
+                    $("#" + value).css("background-color", "rgb(255, 192, 203)");
+                });
+            },
+            function(){
+                //return shot entry to white
+                $(this).css("background-color", "rgb(255, 255, 255");
+
+                //return shot locations to gray
+                var index = $(this).attr("id");
+                shotHistory[index].forEach(function(value){
+                    $("#" + value).css("background-color", "rgb(128, 128, 128)");
+                });
+            });
+        }
+
+        $(function(){
+            updateUI();
+
+            $(".water").click(function(){
+                if(shotList.length < shotsPerTurn) {
+                    if($(this).css("background-color") == "rgb(0, 255, 255)"){
+                        $(this).css("background-color", "rgb(255, 0, 0)");
+                        shotList.push($(this).attr("id"));
+                        updateUI();
+                    }
+                }
+            });
+
+            $("#fireBtn").click(function(){
+                shotList.forEach(function(id){
+                    $("#" + id).css("background-color", "rgb(128, 128, 128)");
+                });
+
+                $("#history").html($("#history").html() +
+                    "<tr><td>" + shotList + "</td><td></td></tr>");
+
+                shotHistory.unshift(shotList);
+                hitHistory.unshift("");
+                shotList = [];
+                updateUI();
+            });
+        })
+    </script>
+</head>
+<body>
+    <h1 id="title">Salvo</h1>
+    <table id="board">
+        <tr>
+            <td style="width: 2em; height: 2em"></td>
+            <td style="width: 2em">A</td>
+            <td style="width: 2em">B</td>
+            <td style="width: 2em">C</td>
+            <td style="width: 2em">D</td>
+            <td style="width: 2em">E</td>
+            <td style="width: 2em">F</td>
+            <td style="width: 2em">G</td>
+            <td style="width: 2em">H</td>
+            <td style="width: 2em">I</td>
+            <td style="width: 2em">J</td>
+        </tr>
+        <tr>
+            <td style="height: 2em">1</td>
+            <td class="water" id="A1"></td>
+            <td class="water" id="B1"></td>
+            <td class="water" id="C1"></td>
+            <td class="water" id="D1"></td>
+            <td class="water" id="E1"></td>
+            <td class="water" id="F1"></td>
+            <td class="water" id="G1"></td>
+            <td class="water" id="H1"></td>
+            <td class="water" id="I1"></td>
+            <td class="water" id="J1"></td>
+        </tr>
+        <tr>
+            <td style="height: 2em">2</td>
+            <td class="water" id="A2"></td>
+            <td class="water" id="B2"></td>
+            <td class="water" id="C2"></td>
+            <td class="water" id="D2"></td>
+            <td class="water" id="E2"></td>
+            <td class="water" id="F2"></td>
+            <td class="water" id="G2"></td>
+            <td class="water" id="H2"></td>
+            <td class="water" id="I2"></td>
+            <td class="water" id="J2"></td>
+        </tr>
+        <tr>
+            <td style="height: 2em">3</td>
+            <td class="water" id="A3"></td>
+            <td class="water" id="B3"></td>
+            <td class="water" id="C3"></td>
+            <td class="water" id="D3"></td>
+            <td class="water" id="E3"></td>
+            <td class="water" id="F3"></td>
+            <td class="water" id="G3"></td>
+            <td class="water" id="H3"></td>
+            <td class="water" id="I3"></td>
+            <td class="water" id="J3"></td>
+        </tr>
+        <tr>
+            <td style="height: 2em">4</td>
+            <td class="water" id="A4"></td>
+            <td class="water" id="B4"></td>
+            <td class="water" id="C4"></td>
+            <td class="water" id="D4"></td>
+            <td class="water" id="E4"></td>
+            <td class="water" id="F4"></td>
+            <td class="water" id="G4"></td>
+            <td class="water" id="H4"></td>
+            <td class="water" id="I4"></td>
+            <td class="water" id="J4"></td>
+        </tr>
+        <tr>
+            <td style="height: 2em">5</td>
+            <td class="water" id="A5"></td>
+            <td class="water" id="B5"></td>
+            <td class="water" id="C5"></td>
+            <td class="water" id="D5"></td>
+            <td class="water" id="E5"></td>
+            <td class="water" id="F5"></td>
+            <td class="water" id="G5"></td>
+            <td class="water" id="H5"></td>
+            <td class="water" id="I5"></td>
+            <td class="water" id="J5"></td>
+        </tr>
+        <tr>
+            <td style="height: 2em">6</td>
+            <td class="water" id="A6"></td>
+            <td class="water" id="B6"></td>
+            <td class="water" id="C6"></td>
+            <td class="water" id="D6"></td>
+            <td class="water" id="E6"></td>
+            <td class="water" id="F6"></td>
+            <td class="water" id="G6"></td>
+            <td class="water" id="H6"></td>
+            <td class="water" id="I6"></td>
+            <td class="water" id="J6"></td>
+        </tr>
+        <tr>
+            <td style="height: 2em">7</td>
+            <td class="water" id="A7"></td>
+            <td class="water" id="B7"></td>
+            <td class="water" id="C7"></td>
+            <td class="water" id="D7"></td>
+            <td class="water" id="E7"></td>
+            <td class="water" id="F7"></td>
+            <td class="water" id="G7"></td>
+            <td class="water" id="H7"></td>
+            <td class="water" id="I7"></td>
+            <td class="water" id="J7"></td>
+        </tr>
+        <tr>
+            <td style="height: 2em">8</td>
+            <td class="water" id="A8"></td>
+            <td class="water" id="B8"></td>
+            <td class="water" id="C8"></td>
+            <td class="water" id="D8"></td>
+            <td class="water" id="E8"></td>
+            <td class="water" id="F8"></td>
+            <td class="water" id="G8"></td>
+            <td class="water" id="H8"></td>
+            <td class="water" id="I8"></td>
+            <td class="water" id="J8"></td>
+        </tr>
+        <tr>
+            <td style="height: 2em">9</td>
+            <td class="water" id="A9"></td>
+            <td class="water" id="B9"></td>
+            <td class="water" id="C9"></td>
+            <td class="water" id="D9"></td>
+            <td class="water" id="E9"></td>
+            <td class="water" id="F9"></td>
+            <td class="water" id="G9"></td>
+            <td class="water" id="H9"></td>
+            <td class="water" id="I9"></td>
+            <td class="water" id="J9"></td>
+        </tr>
+        <tr>
+            <td style="height: 2em">10</td>
+            <td class="water" id="A10"></td>
+            <td class="water" id="B10"></td>
+            <td class="water" id="C10"></td>
+            <td class="water" id="D10"></td>
+            <td class="water" id="E10"></td>
+            <td class="water" id="F10"></td>
+            <td class="water" id="G10"></td>
+            <td class="water" id="H10"></td>
+            <td class="water" id="I10"></td>
+            <td class="water" id="J10"></td>
+        </tr>
+    </table>
+    <div>
+        <h3>Shots Remaining: <span id="shotsRemaining"></span></h3>
+        <p id="shotList"> </p>
+        <input type="button" value="Fire!" id="fireBtn"></input>
+    </div>
+    <table id="history">
+        <tr>
+            <th style="width: 11em">Previous</th>
+            <th style="width: 11em">Result</th>
+        </tr>
+    </table>
+</body>
