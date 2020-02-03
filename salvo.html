@@ -10,6 +10,13 @@
         .water {        background-color: rgb(0, 255, 255);}
     </style>
     <script>
+        //enemy ship objects
+        var carrier = {name: "Carrier", sunk: false, coords: new Array(5)};
+        var battleship = {name: "Battleship", sunk: false, coords: new Array(4)};
+        var cruiser = {name: "Cruiser", sunk: false, coords: new Array(3)};
+        var submarine = {name: "Submarine", sunk: false, coords: new Array(3)};
+        var destroyer = {name: "Destroyer", sunk: false, coords: new Array(2)};
+
         var shotsPerTurn = 5;
         var shotList = [];
         var shotHistory = [];   //TODO: turn histories into one two dimentional array
@@ -20,7 +27,7 @@
             //create html for 'previous shot' table
             var shotTableHTML = "<tr><th style='width: 11em'>Previous</th>" +
                 "<th style='width: 11em'>Result</th></tr>";
-            for(var i=0; i<shotHistory.length; i++){
+            for(let i=0; i<shotHistory.length; i++){
                 shotTableHTML += "<tr class='previousShot' id='" + i + "'><td>" + shotHistory[i] + 
                     "</td><td>" + hitHistory[i] + "</td></tr>";
             }
@@ -53,9 +60,63 @@
             });
         }
 
+        //places ship object on board in a random position
+        function placeShip(ship){
+            //place vertically
+            var startY = Math.ceil(Math.random() * (10 - ship.coords.length));
+            var startX = intToLetter(Math.ceil(Math.random() * 10));
+            for(let i=0; i<ship.coords.length; i++){
+                ship.coords[i] = startX + (startY + i);
+            }
+
+
+            console.log(ship.name + " " + ship.coords);
+        }
+
+        function intToLetter(int){
+            var letter= "invalid";
+            switch(int){
+                case 1:
+                    letter = "A";
+                    break;
+                case 2:
+                    letter = "B";
+                    break;
+                case 3:
+                    letter = "C";
+                    break;
+                case 4:
+                    letter = "D";
+                    break;
+                case 5:
+                    letter = "E";
+                    break;
+                case 6:
+                    letter = "F";
+                    break;
+                case 7:
+                    letter = "G";
+                    break;
+                case 8:
+                    letter = "H";
+                    break;
+                case 9:
+                    letter = "I";
+                    break;
+                case 10:
+                    letter = "J";
+                    break;
+                default:
+                    console.log("intToLetter() invalid value");
+            }
+            return letter;
+        }
+
+        //**************document.ready()*****************
         $(function(){
             updateUI();
 
+            //turns clicked square red and adds coords to shot list
             $(".water").click(function(){
                 if(shotList.length < shotsPerTurn) {
                     if($(this).css("background-color") == "rgb(0, 255, 255)"){
@@ -66,6 +127,7 @@
                 }
             });
 
+            //turns selected squares gray and adds them to shot history
             $("#fireBtn").click(function(){
                 shotList.forEach(function(id){
                     $("#" + id).css("background-color", "rgb(128, 128, 128)");
@@ -79,6 +141,12 @@
                 shotList = [];
                 updateUI();
             });
+
+            placeShip(carrier);
+            placeShip(battleship);
+            placeShip(cruiser);
+            placeShip(submarine);
+            placeShip(destroyer);
         })
     </script>
 </head>
