@@ -10,16 +10,24 @@
         .water {        background-color: rgb(0, 255, 255);}
     </style>
     <script>
+        //rgb values for colors used in styling
+        var colors = {beige: "rgb(245, 245, 220)",
+            black: "rgb(0, 0, 0)",
+            aqua: "rgb(0, 255, 255)",
+            pink: "rgb(255, 192, 203)",
+            gray: "rgb(128, 128, 128)",
+            red: "rgb(255, 0, 0)"};
+
         //enemy ship objects
-        var carrier = {name: "Carrier", sunk: false, coords: new Array(5)};
-        var battleship = {name: "Battleship", sunk: false, coords: new Array(4)};
-        var cruiser = {name: "Cruiser", sunk: false, coords: new Array(3)};
-        var submarine = {name: "Submarine", sunk: false, coords: new Array(3)};
-        var destroyer = {name: "Destroyer", sunk: false, coords: new Array(2)};
+        var ships = [{name: "Carrier", sunk: false, coords: new Array(5)},
+            {name: "Battleship", sunk: false, coords: new Array(4)}, 
+            {name: "Cruiser", sunk: false, coords: new Array(3)}, 
+            {name: "Submarine", sunk: false, coords: new Array(3)}, 
+            {name: "Destroyer", sunk: false, coords: new Array(2)}];
 
         var shotsPerTurn = 5;
         var shotList = [];
-        var shotHistory = [];   //TODO: turn histories into one two dimentional array
+        var shotHistory = [];
         var hitHistory = [];
 
         //refreshes the 'shots remaining', 'shot list' and 'previous shot' displays
@@ -27,6 +35,7 @@
             //create html for 'previous shot' table
             var shotTableHTML = "<tr><th style='width: 11em'>Previous</th>" +
                 "<th style='width: 11em'>Result</th></tr>";
+    
             for(let i=0; i<shotHistory.length; i++){
                 shotTableHTML += "<tr class='previousShot' id='" + i + "'><td>" + shotHistory[i] + 
                     "</td><td>" + hitHistory[i] + "</td></tr>";
@@ -61,18 +70,29 @@
         }
 
         //places ship object on board in a random position
+        //current implementation does not check for overlaps
         function placeShip(ship){
-            //place vertically
-            var startY = Math.ceil(Math.random() * (10 - ship.coords.length));
-            var startX = intToLetter(Math.ceil(Math.random() * 10));
-            for(let i=0; i<ship.coords.length; i++){
-                ship.coords[i] = startX + (startY + i);
+            //50% chance for ship to be horizontal or vertical
+            if(Math.random() < .5){
+                //place vertically
+                var startY = Math.ceil(Math.random() * (10 - ship.coords.length));
+                var startX = intToLetter(Math.ceil(Math.random() * 10));
+                for(let i=0; i<ship.coords.length; i++){
+                    ship.coords[i] = startX + (startY + i);
+                }
+            } else {
+                //place horizontally
+                var startX = Math.ceil(Math.random() * (10 - ship.coords.length));
+                var startY = Math.ceil(Math.random() * 10);
+                for(let i=0; i<ship.coords.length; i++){
+                    ship.coords[i] = intToLetter(startX + i) + startY;
+                }
             }
-
 
             console.log(ship.name + " " + ship.coords);
         }
 
+        //converts int values 1 - 10 to corresponding capital letter
         function intToLetter(int){
             var letter= "invalid";
             switch(int){
@@ -137,16 +157,12 @@
                     "<tr><td>" + shotList + "</td><td></td></tr>");
 
                 shotHistory.unshift(shotList);
-                hitHistory.unshift("");
+                hitHistory.unshift("x");
                 shotList = [];
                 updateUI();
             });
 
-            placeShip(carrier);
-            placeShip(battleship);
-            placeShip(cruiser);
-            placeShip(submarine);
-            placeShip(destroyer);
+            ships.forEach(ship => placeShip(ship));
         })
     </script>
 </head>
