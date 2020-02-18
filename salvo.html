@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head>
     <script src="jquery-3.4.1.min.js"></script>
+    <script src="boardGenerator.js"></script>
     <title>Salvo</title>
     <style>
         body {          background-color: rgb(245, 245, 220);}
@@ -8,6 +9,8 @@
                         text-align: center; }
         table {         table-layout: fixed;}
         .water {        background-color: rgb(0, 255, 255);}
+        .boardHeader {  width: 2em;
+                        height: 2em;}
     </style>
     <script>
         //rgb values for colors used in styling
@@ -17,13 +20,6 @@
             pink: "rgb(255, 192, 203)",
             gray: "rgb(128, 128, 128)",
             red: "rgb(255, 0, 0)"};
-
-        //enemy ship objects
-        var ships = [{name: "Carrier", sunk: false, coords: new Array(5)},
-            {name: "Battleship", sunk: false, coords: new Array(4)}, 
-            {name: "Cruiser", sunk: false, coords: new Array(3)}, 
-            {name: "Submarine", sunk: false, coords: new Array(3)}, 
-            {name: "Destroyer", sunk: false, coords: new Array(2)}];
 
         var shotsPerTurn = 5;
         var shotList = [];
@@ -69,104 +65,12 @@
             });
         }
 
-        //places ship object on board in a random position
-        //current implementation does not check for overlaps
-        function placeShip(ship, index, shipArray){
-            var invalidPlacement;
 
-            do{
-                invalidPlacement = false;
-
-                //50% chance for ship to be horizontal or vertical
-                if(Math.random() < .5){
-                    //place vertically
-                    var startY = Math.ceil(Math.random() * (10 - ship.coords.length));
-                    var startX = intToLetter(Math.ceil(Math.random() * 10));
-                    for(let i=0; i<ship.coords.length; i++){
-                        ship.coords[i] = startX + (startY + i);
-                    }
-                } else {
-                    //place horizontally
-                    var startX = Math.ceil(Math.random() * (10 - ship.coords.length));
-                    var startY = Math.ceil(Math.random() * 10);
-                    for(let i=0; i<ship.coords.length; i++){
-                        ship.coords[i] = intToLetter(startX + i) + startY;
-                    }
-                }
-
-                console.log(ship.name + " " + ship.coords);
-
-                //check if ship overlaps w/ already placed ship
-                for(let i=0; i<index; i++){
-                    if(overlaps(ship, shipArray[i])){
-                        invalidPlacement = true;
-                        break;
-                    }
-                }
-            } while(invalidPlacement);
-        }
-
-        //checks if 2 ships overlap
-        function overlaps(ship1, ship2){
-            var shipsOverlap = false;
-            for(let i=0; i<ship1.coords.length; i++){
-                for(let j=0; j<ship2.coords.length; j++){
-                    if(ship1.coords[i] == ship2.coords[j]){
-                        shipsOverlap = true;
-                        console.log(ship1.name + " overlaps at " + ship1.coords[i]);
-                        break;
-                    }
-                }
-                if(shipsOverlap){
-                    break;
-                }
-            }
-
-            return shipsOverlap;
-        }
-
-        //converts int values 1 - 10 to corresponding capital letter
-        function intToLetter(int){
-            var letter= "invalid";
-            switch(int){
-                case 1:
-                    letter = "A";
-                    break;
-                case 2:
-                    letter = "B";
-                    break;
-                case 3:
-                    letter = "C";
-                    break;
-                case 4:
-                    letter = "D";
-                    break;
-                case 5:
-                    letter = "E";
-                    break;
-                case 6:
-                    letter = "F";
-                    break;
-                case 7:
-                    letter = "G";
-                    break;
-                case 8:
-                    letter = "H";
-                    break;
-                case 9:
-                    letter = "I";
-                    break;
-                case 10:
-                    letter = "J";
-                    break;
-                default:
-                    console.log("intToLetter() invalid value");
-            }
-            return letter;
-        }
 
         //**************document.ready()*****************
         $(function(){
+            $("#gameArea").html(generateBoard());
+
             updateUI();
 
             //turns clicked square red and adds coords to shot list
@@ -197,156 +101,14 @@
 
             //place enemy ships on board
             ships.forEach((ship, index, shipArray) => placeShip(ship, index, shipArray));
+
+            
         })
     </script>
 </head>
 <body>
     <h1 id="title">Salvo</h1>
-    <table id="board">
-        <tr>
-            <td style="width: 2em; height: 2em"></td>
-            <td style="width: 2em">A</td>
-            <td style="width: 2em">B</td>
-            <td style="width: 2em">C</td>
-            <td style="width: 2em">D</td>
-            <td style="width: 2em">E</td>
-            <td style="width: 2em">F</td>
-            <td style="width: 2em">G</td>
-            <td style="width: 2em">H</td>
-            <td style="width: 2em">I</td>
-            <td style="width: 2em">J</td>
-        </tr>
-        <tr>
-            <td style="height: 2em">1</td>
-            <td class="water" id="A1"></td>
-            <td class="water" id="B1"></td>
-            <td class="water" id="C1"></td>
-            <td class="water" id="D1"></td>
-            <td class="water" id="E1"></td>
-            <td class="water" id="F1"></td>
-            <td class="water" id="G1"></td>
-            <td class="water" id="H1"></td>
-            <td class="water" id="I1"></td>
-            <td class="water" id="J1"></td>
-        </tr>
-        <tr>
-            <td style="height: 2em">2</td>
-            <td class="water" id="A2"></td>
-            <td class="water" id="B2"></td>
-            <td class="water" id="C2"></td>
-            <td class="water" id="D2"></td>
-            <td class="water" id="E2"></td>
-            <td class="water" id="F2"></td>
-            <td class="water" id="G2"></td>
-            <td class="water" id="H2"></td>
-            <td class="water" id="I2"></td>
-            <td class="water" id="J2"></td>
-        </tr>
-        <tr>
-            <td style="height: 2em">3</td>
-            <td class="water" id="A3"></td>
-            <td class="water" id="B3"></td>
-            <td class="water" id="C3"></td>
-            <td class="water" id="D3"></td>
-            <td class="water" id="E3"></td>
-            <td class="water" id="F3"></td>
-            <td class="water" id="G3"></td>
-            <td class="water" id="H3"></td>
-            <td class="water" id="I3"></td>
-            <td class="water" id="J3"></td>
-        </tr>
-        <tr>
-            <td style="height: 2em">4</td>
-            <td class="water" id="A4"></td>
-            <td class="water" id="B4"></td>
-            <td class="water" id="C4"></td>
-            <td class="water" id="D4"></td>
-            <td class="water" id="E4"></td>
-            <td class="water" id="F4"></td>
-            <td class="water" id="G4"></td>
-            <td class="water" id="H4"></td>
-            <td class="water" id="I4"></td>
-            <td class="water" id="J4"></td>
-        </tr>
-        <tr>
-            <td style="height: 2em">5</td>
-            <td class="water" id="A5"></td>
-            <td class="water" id="B5"></td>
-            <td class="water" id="C5"></td>
-            <td class="water" id="D5"></td>
-            <td class="water" id="E5"></td>
-            <td class="water" id="F5"></td>
-            <td class="water" id="G5"></td>
-            <td class="water" id="H5"></td>
-            <td class="water" id="I5"></td>
-            <td class="water" id="J5"></td>
-        </tr>
-        <tr>
-            <td style="height: 2em">6</td>
-            <td class="water" id="A6"></td>
-            <td class="water" id="B6"></td>
-            <td class="water" id="C6"></td>
-            <td class="water" id="D6"></td>
-            <td class="water" id="E6"></td>
-            <td class="water" id="F6"></td>
-            <td class="water" id="G6"></td>
-            <td class="water" id="H6"></td>
-            <td class="water" id="I6"></td>
-            <td class="water" id="J6"></td>
-        </tr>
-        <tr>
-            <td style="height: 2em">7</td>
-            <td class="water" id="A7"></td>
-            <td class="water" id="B7"></td>
-            <td class="water" id="C7"></td>
-            <td class="water" id="D7"></td>
-            <td class="water" id="E7"></td>
-            <td class="water" id="F7"></td>
-            <td class="water" id="G7"></td>
-            <td class="water" id="H7"></td>
-            <td class="water" id="I7"></td>
-            <td class="water" id="J7"></td>
-        </tr>
-        <tr>
-            <td style="height: 2em">8</td>
-            <td class="water" id="A8"></td>
-            <td class="water" id="B8"></td>
-            <td class="water" id="C8"></td>
-            <td class="water" id="D8"></td>
-            <td class="water" id="E8"></td>
-            <td class="water" id="F8"></td>
-            <td class="water" id="G8"></td>
-            <td class="water" id="H8"></td>
-            <td class="water" id="I8"></td>
-            <td class="water" id="J8"></td>
-        </tr>
-        <tr>
-            <td style="height: 2em">9</td>
-            <td class="water" id="A9"></td>
-            <td class="water" id="B9"></td>
-            <td class="water" id="C9"></td>
-            <td class="water" id="D9"></td>
-            <td class="water" id="E9"></td>
-            <td class="water" id="F9"></td>
-            <td class="water" id="G9"></td>
-            <td class="water" id="H9"></td>
-            <td class="water" id="I9"></td>
-            <td class="water" id="J9"></td>
-        </tr>
-        <tr>
-            <td style="height: 2em">10</td>
-            <td class="water" id="A10"></td>
-            <td class="water" id="B10"></td>
-            <td class="water" id="C10"></td>
-            <td class="water" id="D10"></td>
-            <td class="water" id="E10"></td>
-            <td class="water" id="F10"></td>
-            <td class="water" id="G10"></td>
-            <td class="water" id="H10"></td>
-            <td class="water" id="I10"></td>
-            <td class="water" id="J10"></td>
-        </tr>
-    </table>
+    <div id="gameArea"></div>
     <div>
         <h3>Shots Remaining: <span id="shotsRemaining"></span></h3>
         <p id="shotList"> </p>
