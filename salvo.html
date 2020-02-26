@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <head>
     <script src="jquery-3.4.1.min.js"></script>
-    <script src="boardGenerator.js"></script>
+    <script src="gameLogic.js"></script>
     <title>Salvo</title>
     <style>
         body {          background-color: rgb(245, 245, 220);}
@@ -19,48 +19,35 @@
             aqua: "rgb(0, 255, 255)",
             pink: "rgb(255, 192, 203)",
             gray: "rgb(128, 128, 128)",
-            red: "rgb(255, 0, 0)"};
-
-        var shotsPerTurn = 5;
-        var shotList = [];
-        var shotHistory = [];
-        var hitHistory = [];
+            red: "rgb(255, 0, 0)",
+            white: "rgb(255, 255, 255)"};
 
         //refreshes the 'shots remaining', 'shot list' and 'previous shot' displays
         function updateUI(){
-            //create html for 'previous shot' table
-            var shotTableHTML = "<tr><th style='width: 11em'>Previous</th>" +
-                "<th style='width: 11em'>Result</th></tr>";
-    
-            for(let i=0; i<shotHistory.length; i++){
-                shotTableHTML += "<tr class='previousShot' id='" + i + "'><td>" + shotHistory[i] + 
-                    "</td><td>" + hitHistory[i] + "</td></tr>";
-            }
-
             //update ui information
-            $("#history").html(shotTableHTML);
+            $("#history").html(generateHistoryHTML());
             $("#shotList").text(shotList);
             $("#shotsRemaining").text(shotsPerTurn - shotList.length);
 
             //attach event listener to new elements
             $(".previousShot").hover(function(){
                 //highlight shot entry in pink
-                $(this).css("background-color", "rgb(255, 192, 203)");
+                $(this).css("background-color", colors.pink);
 
                 //highlight shot locations in pink
                 var index = $(this).attr("id");
                 shotHistory[index].forEach(function(value){
-                    $("#" + value).css("background-color", "rgb(255, 192, 203)");
+                    $("#" + value).css("background-color", colors.pink);
                 });
             },
             function(){
                 //return shot entry to white
-                $(this).css("background-color", "rgb(255, 255, 255");
+                $(this).css("background-color", colors.white);
 
                 //return shot locations to gray
                 var index = $(this).attr("id");
                 shotHistory[index].forEach(function(value){
-                    $("#" + value).css("background-color", "rgb(128, 128, 128)");
+                    $("#" + value).css("background-color", colors.gray);
                 });
             });
         }
@@ -69,16 +56,16 @@
 
         //**************document.ready()*****************
         $(function(){
-            $("#gameArea").html(generateBoard());
+            $("#gameArea").html(generateBoardHTML());
 
             updateUI();
 
             //turns clicked square red and adds coords to shot list
             $(".water").click(function(){
                 if(shotList.length < shotsPerTurn) {
-                    if($(this).css("background-color") == "rgb(0, 255, 255)"){
-                        $(this).css("background-color", "rgb(255, 0, 0)");
-                        shotList.push($(this).attr("id"));
+                    if($(this).css("background-color") == colors.aqua){
+                        $(this).css("background-color", colors.red);
+                        addToShotList($(this));
                         updateUI();
                     }
                 }
@@ -87,22 +74,19 @@
             //turns selected squares gray and adds them to shot history
             $("#fireBtn").click(function(){
                 shotList.forEach(function(id){
-                    $("#" + id).css("background-color", "rgb(128, 128, 128)");
+                    $("#" + id).css("background-color", colors.gray);
                 });
 
                 $("#history").html($("#history").html() +
                     "<tr><td>" + shotList + "</td><td></td></tr>");
 
-                shotHistory.unshift(shotList);
-                hitHistory.unshift("x");
-                shotList = [];
+                resolveCurrentShots();
                 updateUI();
             });
 
             //place enemy ships on board
             ships.forEach((ship, index, shipArray) => placeShip(ship, index, shipArray));
 
-            
         })
     </script>
 </head>
@@ -114,10 +98,5 @@
         <p id="shotList"> </p>
         <input type="button" value="Fire!" id="fireBtn"></input>
     </div>
-    <table id="history">
-        <tr>
-            <th style="width: 11em">Previous</th>
-            <th style="width: 11em">Result</th>
-        </tr>
-    </table>
+    <div id="history"></div>
 </body>
