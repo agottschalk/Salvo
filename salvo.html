@@ -26,8 +26,8 @@
         function updateUI(){
             //update ui information
             $("#history").html(generateHistoryHTML());
-            $("#shotList").text(shotList);
-            $("#shotsRemaining").text(shotsPerTurn - shotList.length);
+            $("#shotList").text(gameData.shotList);
+            $("#shotsRemaining").text(shotsPerTurn - gameData.shotList.length);
 
             //attach event listener to new elements
             $(".previousShot").hover(function(){
@@ -36,7 +36,7 @@
 
                 //highlight shot locations in pink
                 var index = $(this).attr("id");
-                shotHistory[index].forEach(function(value){
+                gameData.shotHistory[index].forEach(function(value){
                     $("#" + value).css("background-color", colors.pink);
                 });
             },
@@ -46,7 +46,7 @@
 
                 //return shot locations to gray
                 var index = $(this).attr("id");
-                shotHistory[index].forEach(function(value){
+                gameData.shotHistory[index].forEach(function(value){
                     $("#" + value).css("background-color", colors.gray);
                 });
             });
@@ -62,7 +62,7 @@
 
             //turns clicked square red and adds coords to shot list
             $(".water").click(function(){
-                if(shotList.length < shotsPerTurn) {
+                if(gameData.shotList.length < shotsPerTurn) {
                     if($(this).css("background-color") == colors.aqua){
                         $(this).css("background-color", colors.red);
                         addToShotList($(this));
@@ -73,19 +73,20 @@
 
             //turns selected squares gray and adds them to shot history
             $("#fireBtn").click(function(){
-                shotList.forEach(function(id){
+                gameData.shotList.forEach(function(id){
                     $("#" + id).css("background-color", colors.gray);
                 });
 
                 $("#history").html($("#history").html() +
-                    "<tr><td>" + shotList + "</td><td></td></tr>");
+                    "<tr><td>" + gameData.shotList + "</td><td></td></tr>");
 
-                resolveCurrentShots();
+                resolveShots(gameData.shotList);
+                resetShotList();
                 updateUI();
             });
 
             //place enemy ships on board
-            ships.forEach((ship, index, shipArray) => placeShip(ship, index, shipArray));
+            gameData.ships.forEach((ship, index, shipArray) => placeShip(ship, index, shipArray));
 
         })
     </script>

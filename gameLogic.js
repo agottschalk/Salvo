@@ -1,30 +1,31 @@
 //contains functions for most game operations
 
 //board dimensions
-var boardWidth = 11;
-var boardHeight = 11;
+const boardWidth = 11;
+const boardHeight = 11;
 
-//enemy ship objects
-var ships = [{name: "Carrier", sunk: false, coords: new Array(5)},
-{name: "Battleship", sunk: false, coords: new Array(4)}, 
-{name: "Cruiser", sunk: false, coords: new Array(3)}, 
-{name: "Submarine", sunk: false, coords: new Array(3)}, 
-{name: "Destroyer", sunk: false, coords: new Array(2)}];
+const shotsPerTurn = 5;
 
-var shotsPerTurn = 5;
 
-var shotList = [];  //shots being taken this turn
-var shotHistory = [];   //shots taken on previous turns
-var hitHistory = [];    //hits and misses of previous turns
+var gameData = {
+    ships: [{name: "Carrier", sunk: false, coords: new Array(5)},
+        {name: "Battleship", sunk: false, coords: new Array(4)}, 
+        {name: "Cruiser", sunk: false, coords: new Array(3)}, 
+        {name: "Submarine", sunk: false, coords: new Array(3)}, 
+        {name: "Destroyer", sunk: false, coords: new Array(2)}],
+    shotList: [],
+    shotHistory: [],
+    hitHistory: []
+}
 
 function generateHistoryHTML(){
     //create html for 'previous shot' table
     let shotTableHTML = "<table><tr><th style='width: 11em'>Previous</th>" +
     "<th style='width: 11em'>Result</th></tr>";
 
-    for(let i=0; i<shotHistory.length; i++){
-        shotTableHTML += "<tr class='previousShot' id='" + i + "'><td>" + shotHistory[i] + 
-            "</td><td>" + hitHistory[i] + "</td></tr>";
+    for(let i=0; i<gameData.shotHistory.length; i++){
+        shotTableHTML += "<tr class='previousShot' id='" + i + "'><td>" + gameData.shotHistory[i] + 
+            "</td><td>" + gameData.hitHistory[i] + "</td></tr>";
     }
 
     shotTableHTML += "</table>";
@@ -39,8 +40,8 @@ function generateHistoryHTML(){
  */
 function addToShotList(square) {
     var added = false;
-    if(shotList.length < shotsPerTurn){
-        shotList.push(square.attr("id"));
+    if(gameData.shotList.length < shotsPerTurn){
+        gameData.shotList.push(square.attr("id"));
         added = true;
     }
     return added;
@@ -51,15 +52,59 @@ function addToShotList(square) {
 /**
  * Adds shot list as well as resulting hits and misses to shot history
  * and clears current shot list for the next turn
+ * @param {array} shots array of shot locations to check
  */
-function resolveCurrentShots(){
-    if(shotList.length > 0){
-        shotHistory.unshift(shotList);
-        hitHistory.unshift("x");
-        shotList = [];
+function resolveShots(shots){
+    if(shots.length > 0){
+        //update shot history
+        gameData.shotHistory.unshift(shots);
+
+        //check hits and misses
+        let ships = gameData.ships;
+        var hits = 0;
+        var misses = 0;
+        for(let shotNum=0; shotNum<shots.length; shotNum++){
+            let shotHit = false;
+            for(let shipNum=0; shipNum<gameData.ships.length; shipNum++){
+                if(shipIsHit(ships[shipNum], shots[shotNum])){
+                    hits++;
+                    //subtract from ship hp, check if sunk
+                    console.log(ships[shipNum].name + " hit at " + shots[shotNum]);
+                    shotHit = true;
+                    break;
+                }
+            }
+            if(!shotHit){
+                misses++;
+            }
+        }
+        
+        gameData.hitHistory.unshift("" + hits + " hits, " + misses + " misses");
     }
 }
 
+/**
+ * Checks if a shot fired at a given board square has hit the given ship
+ * @param {object} ship ship to check if hit
+ * @param {string} coordinate id of board square to check
+ * @return {boolean} true if ship was hit
+ */
+function shipIsHit(ship, coordinate){
+    var hit = false;
+    ship.coords.forEach((coord) => {
+        if(coord == coordinate){
+            hit = true;
+        }
+    });
+    return hit;
+}
+
+/**
+ * Clears shot list array in game data
+ */
+function resetShotList(){
+    gameData.shotList = [];
+}
 
 
 /**
@@ -108,6 +153,7 @@ function intToLetter(int){
 
 /**
  * Creates html for the table the game will be played on
+ * @return {string} html for table representing game board
  */
 function generateBoardHTML(){
     var boardHTML = "<table id='board'>";
@@ -142,9 +188,9 @@ function generateBoardHTML(){
 
 /**
  * Places ships in ship array on board in random, non-overlapping positions
- * @param {Ship} ship 
- * @param {number} index 
- * @param {array} shipArray 
+ * @param {object} ship ship object being placed
+ * @param {number} index index of ship in array
+ * @param {array} shipArray array ship belongs to
  */
 function placeShip(ship, index, shipArray){
     var invalidPlacement;
@@ -183,8 +229,8 @@ function placeShip(ship, index, shipArray){
 
 /**
  * Checks whether or not two ships have been placed in overlapping positions
- * @param {Ship} ship1 
- * @param {Ship} ship2 
+ * @param {object} ship1 first ship being checked
+ * @param {object} ship2 second ship being checked
  * @return {boolean} true if ships overlap
  */
 function overlaps(ship1, ship2){
