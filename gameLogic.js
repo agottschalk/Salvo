@@ -6,13 +6,35 @@ const boardHeight = 11;
 
 const shotsPerTurn = 5;
 
+class Ship {
+    constructor(name, size){
+        this._name = name;
+        this._size = size;
+        this._hp = this._size;
+        this._coords = new Array(this._size);
+    }
+
+    get name(){
+        return this._name;
+    }
+
+    get sunk(){
+        return this._hp <= 0;
+    }
+
+    get coords(){
+        return this._coords;
+    }
+
+    takeDamage(){
+        this._hp -= 1;
+    }
+}
 
 var gameData = {
-    ships: [{name: "Carrier", sunk: false, coords: new Array(5)},
-        {name: "Battleship", sunk: false, coords: new Array(4)}, 
-        {name: "Cruiser", sunk: false, coords: new Array(3)}, 
-        {name: "Submarine", sunk: false, coords: new Array(3)}, 
-        {name: "Destroyer", sunk: false, coords: new Array(2)}],
+    ships: [new Ship("Carrier", 5), new Ship("Battleship", 4), 
+        new Ship("Cruiser", 3), new Ship("Submarine", 3),
+        new Ship("Destroyer", 2)],
     shotList: [],
     shotHistory: [],
     hitHistory: []
@@ -66,11 +88,15 @@ function resolveShots(shots){
         for(let shotNum=0; shotNum<shots.length; shotNum++){
             let shotHit = false;
             for(let shipNum=0; shipNum<gameData.ships.length; shipNum++){
-                if(shipIsHit(ships[shipNum], shots[shotNum])){
+                let ship = ships[shipNum];
+                if(shipIsHit(ship, shots[shotNum])){
                     hits++;
-                    //subtract from ship hp, check if sunk
-                    console.log(ships[shipNum].name + " hit at " + shots[shotNum]);
+                    ship.takeDamage();
+                    console.log(ship.name + " hit at " + shots[shotNum]);
                     shotHit = true;
+                    if(ship.sunk){
+                        alert("Enemy " + ship.name + " was sunk");
+                    }
                     break;
                 }
             }
@@ -80,6 +106,10 @@ function resolveShots(shots){
         }
         
         gameData.hitHistory.unshift("" + hits + " hits, " + misses + " misses");
+
+        if(gameIsWon()){
+            alert("Congratulations! You win!");
+        }
     }
 }
 
@@ -97,6 +127,23 @@ function shipIsHit(ship, coordinate){
         }
     });
     return hit;
+}
+
+/**
+ * Checks if the all ships have been sunk
+ * @return true if all ships are sunk
+ */
+function gameIsWon(){
+    var won = true;
+
+    //if any ships are left, set flag to false
+    gameData.ships.forEach((ship) => {
+        if(!ship.sunk){
+            won = false;
+        }
+    });
+
+    return won;
 }
 
 /**
